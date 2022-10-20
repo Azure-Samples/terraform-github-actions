@@ -33,7 +33,7 @@ jobs:
 
     # Install the latest version of the Terraform CLI
     - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v1
+      uses: hashicorp/setup-terraform@v2
       with:
         terraform_wrapper: false
 
@@ -60,7 +60,7 @@ jobs:
         
     # Save plan to artifacts  
     - name: Publish Terraform Plan
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: tfplan
         path: tfplan
@@ -93,7 +93,7 @@ jobs:
     # If changes are detected, create a new issue
     - name: Publish Drift Report
       if: steps.tf-plan.outputs.exitcode == 2
-      uses: actions/github-script@v2
+      uses: actions/github-script@v6
       env:
         SUMMARY: "${{ steps.tf-plan-string.outputs.summary }}"
       with:
