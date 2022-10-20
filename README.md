@@ -44,6 +44,8 @@ To use these workflows in your environment several prerequiste steps are require
 
 3. **Add GitHub Secrets**
 
+    _Note: While none of the data about the Azure identities contain any secrets or credentials we still utilize GitHub Secrets as a convenient means to paramaterize the identity information per environment._
+
     Create the following secrets on the repository using the `read-only` identity:
 
     - _AZURE_CLIENT_ID_ : The application (client) ID of the app registration in Azure
@@ -56,7 +58,7 @@ To use these workflows in your environment several prerequiste steps are require
     
     - _AZURE_CLIENT_ID_ : The application (client) ID of the app registration in Azure
 
-    Instuructions to add the secrets to the environment can be found [here](https://docs.github.com/actions/security-guides/encrypted-secrets#creating-encrypted-secrets-for-an-environment). _Note: this will override the repository secret when doing the deploy step to the `production` environment when elevated read/write permissions are required.
+    Instuructions to add the secrets to the environment can be found [here](https://docs.github.com/actions/security-guides/encrypted-secrets#creating-encrypted-secrets-for-an-environment). The environment secret will override the repository secret when doing the deploy step to the `production` environment when elevated read/write permissions are required.
     
 4. **Configure Terraform State Location**
 
