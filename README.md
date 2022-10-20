@@ -62,7 +62,7 @@ To use these workflows in your environment several prerequiste steps are require
     
 4. **Configure Terraform State Location**
 
-    Terraform utilizes a [state file](https://www.terraform.io/language/state) to store information about the current state of your managed infrastructure and associated configuration. This file will need to be persisted between different runs of the workflow. The recommended approach is to store this file within an Azure Storage Account or other similiar remote backend. The [Terraform backend block]() `TODO: add link` will need to be configured to point to an appropriate location where your workflow has permissions. In addition, both Azure identities used by the workflows will need `Storage Blob Data Contributor` to the state file container. Normally this storage would be created manually or via a separate workflow. 
+Terraform utilizes a [state file](https://www.terraform.io/language/state) to store information about the current state of your managed infrastructure and associated configuration. This file will need to be persisted between different runs of the workflow. The recommended approach is to store this file within an Azure Storage Account or other similiar remote backend. The [Terraform backend block]() `TODO: add link` will need to be configured to point to an appropriate location where your workflow has permissions. In addition, both Azure identities used by the workflows will need `Storage Blob Data Contributor` to the state file container as well as `Reader and Data Access` at the storage account level. Normally, this storage and access permissions would be created manually or via a separate workflow.
 
 ## Additional Resources
 
