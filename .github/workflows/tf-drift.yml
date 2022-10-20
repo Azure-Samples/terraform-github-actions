@@ -1,0 +1,115 @@
+name: 'Terraform Configuration Drift Check'
+
+on:
+  schedule:
+    - cron: '0 4 * * *' # runs nightly at 4 am
+
+#Special permissions required for OIDC authentication
+permissions:
+  id-token: write
+  contents: read
+  issues: write
+
+#These environment variables are used by the terraform azure provider to setup OIDD authenticate. 
+env:
+  ARM_CLIENT_ID: "${{ secrets.AZURE_CLIENT_ID }}"
+  ARM_SUBSCRIPTION_ID: "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+  ARM_TENANT_ID: "${{ secrets.AZURE_TENANT_ID }}"
+
+jobs:
+  terraform-plan:
+    name: 'Terraform Plan'
+    runs-on: ubuntu-latest
+    env:
+      #this is needed since we are running terraform with read-only permissions
+      ARM_SKIP_PROVIDER_REGISTRATION: true
+    outputs:
+      tfplanExitCode: ${{ steps.tf-plan.outputs.exitcode }}
+
+    steps:
+    # Checkout the repository to the GitHub Actions runner
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    # Install the latest version of the Terraform CLI
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+      with:
+        terraform_wrapper: false
+
+    # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
+    - name: Terraform Init
+      run: terraform init
+
+    # Generates an execution plan for Terraform
+    # An exit code of 0 indicated no changes, 1 a terraform failure, 2 there are pending changes.
+    - name: Terraform Plan
+      id: tf-plan
+      run: |
+        export exitcode=0
+        terraform plan -detailed-exitcode -no-color -out tfplan || export exitcode=$?
+
+        echo "::set-output name=exitcode::$exitcode"
+        
+        if [ $exitcode -eq 1 ]; then
+          echo Terraform Plan Failed!
+          exit 1
+        else 
+          exit 0
+        fi
+        
+    # Save plan to artifacts  
+    - name: Publish Terraform Plan
+      uses: actions/upload-artifact@v2
+      with:
+        name: tfplan
+        path: tfplan
+        
+    # Create string output of Terraform Plan
+    - name: Create String Output
+      id: tf-plan-string
+      run: |
+        TERRAFORM_PLAN=$(terraform show -no-color tfplan)
+        echo "## Terraform Plan Output" >> tf.string
+        echo "<details><summary>Click to expand</summary>" >> tf.string
+        echo "" >> tf.string
+        echo '```terraform' >> tf.string
+        echo "$TERRAFORM_PLAN" >> tf.string
+        echo '```' >> tf.string
+        echo "</details>" >> tf.string
+        
+        SUMMARY=$(cat tf.string)
+        SUMMARY="${SUMMARY//'%'/'%25'}"
+        SUMMARY="${SUMMARY//$'\n'/'%0A'}"
+        SUMMARY="${SUMMARY//$'\r'/'%0D'}"
+        
+        echo "::set-output name=summary::$SUMMARY"
+
+    # Publish Terraform Plan as task summary
+    - name: Publish Terraform Plan to Task Summary
+      run: |
+        cat tf.string >> $GITHUB_STEP_SUMMARY
+
+    # If changes are detected, create a new issue
+    - name: Publish Drift Report
+      if: steps.tf-plan.outputs.exitcode == 2
+      uses: actions/github-script@v2
+      env:
+        SUMMARY: "${{ steps.tf-plan-string.outputs.summary }}"
+      with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const body = `${process.env.SUMMARY}`;
+            github.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: "Terraform Configuration Drift Detected",
+                body: body
+             })
+             
+ 
+    # Mark the workflow as failed if drift detected 
+    - name: Error on Failure
+      if: steps.tf-plan.outputs.exitcode == 2
+      run: exit 1
+      

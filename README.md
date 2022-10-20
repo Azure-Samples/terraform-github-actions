@@ -40,7 +40,7 @@ To use these workflows in your environment several prerequiste steps are require
 
 2. **Setup Azure Identity**: 
 
-    An Azure Active Directory application is required that has permissions to deploy within your Azure subscription. Create a separate application for a `read-only` and `read/write` account and give them the appropriate permissions in your Azure subscription. Next setup the federated credentials to allow the GitHub environments to utilize the identity using OIDC. See the [Azure documentation](https://docs.microsoft.com/azure/developer/github/connect-from-azure?tabs=azure-portal%2Clinux#use-the-azure-login-action-with-openid-connect) for detailed instructions. Make sure to set the Enitity Type to `Environment` and use the appropriate environment name for the GitHub name.
+    An Azure Active Directory application is required that has permissions to deploy within your Azure subscription. Create a separate application for a `read-only` and `read/write` account and give them the appropriate permissions in your Azure subscription. Next setup the federated credentials to allow the GitHub environments to utilize the identity using OIDC. See the [Azure documentation](https://docs.microsoft.com/azure/developer/github/connect-from-azure?tabs=azure-portal%2Clinux#use-the-azure-login-action-with-openid-connect) for detailed instructions. For the `read/write` identity make sure to set the Enitity Type to `Environment` and use the `production` environment name. For the `read-only` identity use the `main` branch with the branch Entity Type.
 
 3. **Add GitHub Secrets**
 
