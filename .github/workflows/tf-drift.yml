@@ -50,7 +50,7 @@ jobs:
         export exitcode=0
         terraform plan -detailed-exitcode -no-color -out tfplan || export exitcode=$?
         
-        echo "exitcode=$exitcode" >> $GITHUB_STATE
+        echo "exitcode=$exitcode" >> $GITHUB_OUTPUT
         
         if [ $exitcode -eq 1 ]; then
           echo Terraform Plan Failed!
@@ -84,7 +84,7 @@ jobs:
         SUMMARY="${SUMMARY//$'\n'/'%0A'}"
         SUMMARY="${SUMMARY//$'\r'/'%0D'}"
         
-        echo "summary=$SUMMARY" >> $GITHUB_STATE
+        echo "summary=$SUMMARY" >> $GITHUB_OUTPUT
 
     # Publish Terraform Plan as task summary
     - name: Publish Terraform Plan to Task Summary
