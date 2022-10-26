@@ -1,4 +1,4 @@
-name: 'Terraform Configuration Drift Check'
+name: 'Terraform Configuration Drift Detection'
 
 on:
   workflow_dispatch: 
