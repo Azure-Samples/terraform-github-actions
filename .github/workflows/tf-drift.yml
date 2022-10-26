@@ -1,7 +1,6 @@
 name: 'Terraform Configuration Drift Check'
 
 on:
-  push:
   workflow_dispatch: 
   schedule:
     - cron: '41 3 * * *' # runs nightly at 3:41 am
@@ -119,11 +118,9 @@ jobs:
               const issue = issues.data[0]
               
               if ( issue.body == body ) {
-                //no changes from before skip
                 console.log('Drift Detected: Found matching issue with duplicate content')
               } else {
                 console.log('Drift Detected: Found matching issue, updating body')
-                //update the body of the issue
                 github.rest.issues.update({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
@@ -132,8 +129,8 @@ jobs:
                 })
               }
             } else {
-              console.log('Drift Detected: Creating New Issue')
-              //create new issue
+              console.log('Drift Detected: Creating new issue')
+
               github.rest.issues.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
