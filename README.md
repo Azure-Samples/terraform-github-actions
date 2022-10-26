@@ -59,15 +59,15 @@ To use these workflows in your environment several prerequiste steps are require
 
     Create the following secrets on the repository using the `read-only` identity:
 
-    - _AZURE_CLIENT_ID_ : The application (client) ID of the app registration in Azure
-    - _AZURE_TENANT_ID_ : The tenant ID of Azure Active Directory where the app registration is defined.
-    - _AZURE_SUBSCRIPTION_ID_ : The subscription ID where the app registration is defined.
+    - `AZURE_CLIENT_ID` : The application (client) ID of the app registration in Azure
+    - `AZURE_TENANT_ID` : The tenant ID of Azure Active Directory where the app registration is defined.
+    - `AZURE_SUBSCRIPTION_ID` : The subscription ID where the app registration is defined.
     
     Instructions to add the secrets to the repository can be found [here](https://docs.github.com/en/actions/security-guides/encrypted-secrets#creating-encrypted-secrets-for-a-repository).
     
     Additionally create an additional secret on the `production` environment using the `read-write` identity:
     
-    - _AZURE_CLIENT_ID_ : The application (client) ID of the app registration in Azure
+    - `AZURE_CLIENT_ID` : The application (client) ID of the app registration in Azure
 
     Instuructions to add the secrets to the environment can be found [here](https://docs.github.com/actions/security-guides/encrypted-secrets#creating-encrypted-secrets-for-an-environment). The environment secret will override the repository secret when doing the deploy step to the `production` environment when elevated read/write permissions are required.
     
