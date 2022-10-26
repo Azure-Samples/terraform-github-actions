@@ -81,10 +81,8 @@ jobs:
         echo "$TERRAFORM_PLAN" >> $GITHUB_OUTPUT
         echo '```' >> $GITHUB_OUTPUT
         echo "</details>" >> $GITHUB_OUTPUT
-        echo "${delimiter}" >> "${GITHUB_OUTPUT}"
-
-        echo "summary=$SUMMARY" >> $GITHUB_OUTPUT
-
+        echo "${delimiter}" >> $GITHUB_OUTPUT
+        
     # Publish Terraform Plan as task summary
     - name: Publish Terraform Plan to Task Summary
       env:
