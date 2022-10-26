@@ -82,8 +82,8 @@ jobs:
         SUMMARY=$(cat tf.string)
         SUMMARY="${SUMMARY//'%'/'%25'}"
         SUMMARY="${SUMMARY//$'\r'/'%OD'}"
-	
-	echo "summary=$SUMMARY" >> $GITHUB_OUTPUT
+
+        echo "summary=$SUMMARY" >> $GITHUB_OUTPUT
 
     # Publish Terraform Plan as task summary
     - name: Publish Terraform Plan to Task Summary
