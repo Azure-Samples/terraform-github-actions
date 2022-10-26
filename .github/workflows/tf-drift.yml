@@ -1,8 +1,10 @@
 name: 'Terraform Configuration Drift Check'
 
 on:
+  push:
+  workflow_dispatch: 
   schedule:
-    - cron: '0 4 * * *' # runs nightly at 4 am
+    - cron: '41 3 * * *' # runs nightly at 3:41 am
 
 #Special permissions required for OIDC authentication
 permissions:
@@ -100,14 +102,46 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const body = `${process.env.SUMMARY}`;
-            github.rest.issues.create({
+            const title = 'Terraform Configuration Drift Detected';
+            const creator = 'github-actions[bot]'
+          
+            // Look to see if there is an existing drift issue
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              creator: creator,
+              title: title
+            })
+              
+            if( issues.data.length > 0 } {
+              // We assume there shouldn't be more than 1 open issue, since we update any issue we find
+              const issue = issues.data[0]
+              
+              if ( issue.body == body ) {
+                //no changes from before skip
+                console.log('Drift Detected: Found matching issue with duplicate content')
+              } else {
+                console.log('Drift Detected: Found matching issue, updating body')
+                //update the body of the issue
+                github.rest.issues.update({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  body: body
+                })
+              }
+            } else {
+              console.log('Drift Detected: Creating New Issue')
+              //create new issue
+              github.rest.issues.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                title: "Terraform Configuration Drift Detected",
+                title: title,
                 body: body
              })
+            }
              
- 
     # Mark the workflow as failed if drift detected 
     - name: Error on Failure
       if: steps.tf-plan.outputs.exitcode == 2
