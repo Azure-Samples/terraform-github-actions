@@ -114,7 +114,7 @@ jobs:
               title: title
             })
               
-            if( issues.data.length > 0 } {
+            if( issues.data.length > 0 ) {
               // We assume there shouldn't be more than 1 open issue, since we update any issue we find
               const issue = issues.data[0]
               
