@@ -18,7 +18,7 @@ This is a sample repository that shows how to use GitHub Actions workflows to ma
 
 ## Workflows
 
-1. [**Terraform Unit Test**](.github/workflows/tf-unit-test.yml)
+1. [**Terraform Unit Tests**](.github/workflows/tf-unit-tests.yml)
 
     This workflow is designed to be run on every commit and is composed of a set of unit tests on the infrastructure code. It runs [terraform fmt]( https://www.terraform.io/cli/commands/fmt) to ensure the code is properly linted and follows Terraform best practices. Next it performs [terraform validate](https://www.terraform.io/cli/commands/validate) to check that the code is syntactically correct and internally consistent.
 
