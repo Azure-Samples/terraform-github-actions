@@ -17,8 +17,8 @@ jobs:
             const issues = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              state: open,
-              creator: github-actions,
+              state: "open",
+              creator: "github-actions",
               title: "Terraform Configuration Drift Detected"
             });
             
