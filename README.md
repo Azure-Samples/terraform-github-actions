@@ -44,7 +44,14 @@ To use these workflows in your environment several prerequiste steps are require
 
 3. **Setup Azure Identity**: 
 
-    An Azure Active Directory application is required that has permissions to deploy within your Azure subscription. Create a separate application for a `read-only` and `read/write` accounts and give them the appropriate permissions in your Azure subscription. In addition, both roles will also need at least `Reader and Data Access` permissions to the storage account where the Terraform state from step 1 resides. Next, setup the federated credentials to allow GitHub to utilize the identity using OIDC. See the [Azure documentation](https://docs.microsoft.com/azure/developer/github/connect-from-azure?tabs=azure-portal%2Clinux#use-the-azure-login-action-with-openid-connect) for detailed instructions. For the `read/write` identity make sure to set the Enitity Type to `Environment` and use the `production` environment name. For the `read-only` identity use the `main` branch with the `branch` Entity Type.
+    An Azure Active Directory application is required that has permissions to deploy within your Azure subscription. Create a separate application for a `read-only` and `read/write` accounts and give them the appropriate permissions in your Azure subscription. In addition, both roles will also need at least `Reader and Data Access` permissions to the storage account where the Terraform state from step 1 resides. Next, setup the federated credentials to allow GitHub to utilize the identity using OIDC. See the [Azure documentation](https://docs.microsoft.com/azure/developer/github/connect-from-azure?tabs=azure-portal%2Clinux#use-the-azure-login-action-with-openid-connect) for detailed instructions. 
+    
+    For the `read/write` identity create 1 federated credential as follows:
+    - Set `Entity Type` to `Environment` and use the `production` environment name.
+
+    For the `read-only` identity create 2 federated credentials as follows:
+    - Set `Entity Type` to `Pull Request`.
+    - Set `Entity Type` to `Branch` and use the `main` branch name.
 
 4. **Add GitHub Secrets**
 
