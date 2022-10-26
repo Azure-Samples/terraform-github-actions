@@ -19,7 +19,7 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 state: 'open',
-                creator: 'github-actions[bot]',
+                creator: 'github-actions[bodt]',
                 title: 'Terraform Configuration Drift Detected'
               })
               
