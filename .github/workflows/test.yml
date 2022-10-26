@@ -23,6 +23,7 @@ jobs:
                 title: 'Terraform Configuration Drift Detected'
               })
               .then((issues) => {
+                console.log("Hi there");
                 for (const issue of issues) {
                   console.log(issue);
                 }
