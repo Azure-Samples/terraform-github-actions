@@ -137,6 +137,36 @@ jobs:
                 body: body
              })
             }
+            
+    # If changes aren't detected, close any open drift issues
+    - name: Publish Drift Report
+      if: steps.tf-plan.outputs.exitcode == 0
+      uses: actions/github-script@v6
+      with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const title = 'Terraform Configuration Drift Detected';
+            const creator = 'github-actions[bot]'
+          
+            // Look to see if there is an existing drift issue
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              creator: creator,
+              title: title
+            })
+              
+            if( issues.data.length > 0 ) {
+              const issue = issues.data[0]
+              
+              github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                state: 'closed'
+              })
+            } 
              
     # Mark the workflow as failed if drift detected 
     - name: Error on Failure
