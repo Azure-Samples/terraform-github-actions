@@ -19,7 +19,9 @@ jobs:
               .paginate(github.rest.issues.listForRepo, {
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                state: 'open'
+                state: 'open',
+                creator: 'github-actions[bot]',
+                title: 'Terraform Configuration Drift Detected'
               })
               .then((issues) => {
                 console.log("Hi there");
