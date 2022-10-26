@@ -15,18 +15,13 @@ jobs:
       with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            await github
-              .paginate(github.rest.issues.listForRepo, {
+            const issues = await github.rest.issues.listForRepo({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 state: 'open',
                 creator: 'github-actions[bot]',
                 title: 'Terraform Configuration Drift Detected'
               })
-              .then((issues) => {
-                console.log("Hi there");
-                for (const issue of issues) {
-                  console.log(issue);
-                }
-              });
-
+              
+            console.log(issues);
+            
