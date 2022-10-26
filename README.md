@@ -1,6 +1,6 @@
 # GitHub Actions Workflows for Terraform
 
-This is a sample repository that shows how to build GitHub Actions workflows to manage infrastructure with Terraform. 
+This is a sample repository that shows how to use GitHub Actions workflows to manage Azure infrastructure with Terraform. 
 
 ## Architecture
 
@@ -10,7 +10,7 @@ This is a sample repository that shows how to build GitHub Actions workflows to 
 
 1. Create a new branch and check in the needed Terraform code modifications.
 2. Create a Pull Request (PR) in GitHub once you're ready to merge your changes into your environment.
-3. A GitHub Actions workflow will trigger to ensure your code is well formatted. In addition, a Terraform Plan analysis should run to generate a preview of the changes that will happen in your Azure environment.
+3. A GitHub Actions workflow will trigger to ensure your code is well formatted. In addition, a Terraform plan will run to generate a preview of the changes that will happen in your Azure environment.
 4. Once appropriately reviewed, the PR can be merged into your main branch.
 5. Another GitHub Actions workflow will trigger from the main branch and execute the changes using Terraform.
 6. A regularly scheduled GitHub Action workflow should also run to look for any configuration drift in your environment and create a new issue if changes are detected.
@@ -20,7 +20,7 @@ This is a sample repository that shows how to build GitHub Actions workflows to 
 
 1. [**Terraform Unit Test**](.github/workflows/tf-unit-test.yml)
 
-    This workflow is designed to be run on every commit and is composed of a set of unit tests on the infrastructure code. It runs [terraform fmt]( https://www.terraform.io/cli/commands/fmt) to ensure the code is properly linted and follows terraform best practices. Next it performs [terraform validate](https://www.terraform.io/cli/commands/validate) to check that the code is syntactically correct and internally consistent.
+    This workflow is designed to be run on every commit and is composed of a set of unit tests on the infrastructure code. It runs [terraform fmt]( https://www.terraform.io/cli/commands/fmt) to ensure the code is properly linted and follows Terraform best practices. Next it performs [terraform validate](https://www.terraform.io/cli/commands/validate) to check that the code is syntactically correct and internally consistent.
 
 2. [**Terraform Plan / Apply**](.github/workflows/tf-plan-apply.yml)
 
@@ -28,21 +28,25 @@ This is a sample repository that shows how to build GitHub Actions workflows to 
 
 3. [**Terraform Drift Detection**](.github/workflows/tf-drift.yml)
 
-    This workflow runs on a periodic basis to scan your environment for any configuration drift (i.e. changes made outside of terraform). If any drift is detected a GitHub Issue is raised to alert the maintainers of the project. 
+    This workflow runs on a periodic basis to scan your environment for any configuration drift (i.e. changes made outside of Terraform). If any drift is detected a GitHub Issue is raised to alert the maintainers of the project. 
 
 ## Getting Started
 
 To use these workflows in your environment several prerequiste steps are required:
 
-1. **Create GitHub Environment**
+1. **Configure Terraform State Location**
 
-    The workflows utilizes GitHub Environments and secrets to store the azure identity information and setup an appoval process for deployments. Create an environment named `production` by following these [insturctions](https://docs.github.com/actions/deployment/targeting-different-environments/using-environments-for-deployment#creating-an-environment). On the `production` environment setup a protection rule and add any required approvers you want that need to sign off on production deployments. You can also limit the environment to your main branch. Detailed instructions can be found [here](https://docs.github.com/actions/deployment/targeting-different-environments/using-environments-for-deployment#creating-an-environment).
+    Terraform utilizes a [state file](https://www.terraform.io/language/state) to store information about the current state of your managed infrastructure and associated configuration. This file will need to be persisted between different runs of the workflow. The recommended approach is to store this file within an Azure Storage Account or other similiar remote backend. Normally, this storage would be provisioned manually or via a separate workflow. The [Terraform backend block](main.tf#L10-L16) will need updated with your selected storage location (see [here](https://developer.hashicorp.com/terraform/language/settings/backends/azurerm) for documentation).
 
-2. **Setup Azure Identity**: 
+2. **Create GitHub Environment**
 
-    An Azure Active Directory application is required that has permissions to deploy within your Azure subscription. Create a separate application for a `read-only` and `read/write` account and give them the appropriate permissions in your Azure subscription. Next setup the federated credentials to allow the GitHub environments to utilize the identity using OIDC. See the [Azure documentation](https://docs.microsoft.com/azure/developer/github/connect-from-azure?tabs=azure-portal%2Clinux#use-the-azure-login-action-with-openid-connect) for detailed instructions. For the `read/write` identity make sure to set the Enitity Type to `Environment` and use the `production` environment name. For the `read-only` identity use the `main` branch with the branch Entity Type.
+    The workflows utilizes GitHub Environments and Secrets to store the azure identity information and setup an appoval process for deployments. Create an environment named `production` by following these [insturctions](https://docs.github.com/actions/deployment/targeting-different-environments/using-environments-for-deployment#creating-an-environment). On the `production` environment setup a protection rule and add any required approvers you want that need to sign off on production deployments. You can also limit the environment to your main branch. Detailed instructions can be found [here](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment#environment-protection-rules).
 
-3. **Add GitHub Secrets**
+3. **Setup Azure Identity**: 
+
+    An Azure Active Directory application is required that has permissions to deploy within your Azure subscription. Create a separate application for a `read-only` and `read/write` accounts and give them the appropriate permissions in your Azure subscription. In addition, both roles will also need at least `Reader and Data Access` permissions to the storage account where the Terraform state from step 1 resides. Next, setup the federated credentials to allow GitHub to utilize the identity using OIDC. See the [Azure documentation](https://docs.microsoft.com/azure/developer/github/connect-from-azure?tabs=azure-portal%2Clinux#use-the-azure-login-action-with-openid-connect) for detailed instructions. For the `read/write` identity make sure to set the Enitity Type to `Environment` and use the `production` environment name. For the `read-only` identity use the `main` branch with the `branch` Entity Type.
+
+4. **Add GitHub Secrets**
 
     _Note: While none of the data about the Azure identities contain any secrets or credentials we still utilize GitHub Secrets as a convenient means to paramaterize the identity information per environment._
 
@@ -60,9 +64,6 @@ To use these workflows in your environment several prerequiste steps are require
 
     Instuructions to add the secrets to the environment can be found [here](https://docs.github.com/actions/security-guides/encrypted-secrets#creating-encrypted-secrets-for-an-environment). The environment secret will override the repository secret when doing the deploy step to the `production` environment when elevated read/write permissions are required.
     
-4. **Configure Terraform State Location**
-
-    Terraform utilizes a [state file](https://www.terraform.io/language/state) to store information about the current state of your managed infrastructure and associated configuration. This file will need to be persisted between different runs of the workflow. The recommended approach is to store this file within an Azure Storage Account or other similiar remote backend. The [Terraform backend block]() `TODO: add link` will need to be configured to point to an appropriate location where your workflow has permissions. In addition, both Azure identities used by the workflows will need `Storage Blob Data Contributor` to the state file container as well as `Reader and Data Access` at the storage account level. Normally, this storage and access permissions would be created manually or via a separate workflow.
 
 ## Additional Resources
 
