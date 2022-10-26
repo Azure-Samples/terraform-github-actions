@@ -88,7 +88,7 @@ jobs:
       env:
         SUMMARY: ${{ steps.tf-plan-string.outputs.summary }}
       run: |
-        echo $SUMMARY >> $GITHUB_STEP_SUMMARY
+        echo "$SUMMARY" >> $GITHUB_STEP_SUMMARY
 
     # If changes are detected, create a new issue
     - name: Publish Drift Report
