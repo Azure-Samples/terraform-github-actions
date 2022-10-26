@@ -71,25 +71,26 @@ jobs:
       id: tf-plan-string
       run: |
         TERRAFORM_PLAN=$(terraform show -no-color tfplan)
-        echo "## Terraform Plan Output" >> tf.string
-        echo "<details><summary>Click to expand</summary>" >> tf.string
-        echo "" >> tf.string
-        echo '```terraform' >> tf.string
-        echo "$TERRAFORM_PLAN" >> tf.string
-        echo '```' >> tf.string
-        echo "</details>" >> tf.string
         
-        SUMMARY=$(cat tf.string)
-        SUMMARY="${SUMMARY//'%'/'%25'}"
-        SUMMARY="${SUMMARY//$'\n'/'%0A'}"
-        SUMMARY="${SUMMARY//$'\r'/'%0D'}"
-        
+        delimiter="$(openssl rand -hex 8)"
+        echo "summary<<${delimiter}" >> $GITHUB_OUTPUT
+        echo "## Terraform Plan Output" >> $GITHUB_OUTPUT
+        echo "<details><summary>Click to expand</summary>" >> $GITHUB_OUTPUT
+        echo "" >> $GITHUB_OUTPUT
+        echo '```terraform' >> $GITHUB_OUTPUT
+        echo "$TERRAFORM_PLAN" >> $GITHUB_OUTPUT
+        echo '```' >> $GITHUB_OUTPUT
+        echo "</details>" >> $GITHUB_OUTPUT
+        echo "${delimiter}" >> "${GITHUB_OUTPUT}"
+
         echo "summary=$SUMMARY" >> $GITHUB_OUTPUT
 
     # Publish Terraform Plan as task summary
     - name: Publish Terraform Plan to Task Summary
+      env:
+        SUMMARY: "${{ steps.tf-plan-string.outputs.summary }}"
       run: |
-        cat tf.string >> $GITHUB_STEP_SUMMARY
+        echo $SUMMARY >> $GITHUB_STEP_SUMMARY
 
     # If changes are detected, create a new issue
     - name: Publish Drift Report
