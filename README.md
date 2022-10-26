@@ -20,7 +20,7 @@ This is a sample repository that shows how to use GitHub Actions workflows to ma
 
 1. [**Terraform Unit Tests**](.github/workflows/tf-unit-tests.yml)
 
-    This workflow is designed to be run on every commit and is composed of a set of unit tests on the infrastructure code. It runs [terraform fmt]( https://www.terraform.io/cli/commands/fmt) to ensure the code is properly linted and follows Terraform best practices. Next it performs [terraform validate](https://www.terraform.io/cli/commands/validate) to check that the code is syntactically correct and internally consistent.
+    This workflow runs on every commit and is composed of a set of unit tests on the infrastructure code. It runs [terraform fmt]( https://www.terraform.io/cli/commands/fmt) to ensure the code is properly linted and follows terraform best practices. Next it performs [terraform validate](https://www.terraform.io/cli/commands/validate) to check that the code is syntactically correct and internally consistent.
 
 2. [**Terraform Plan / Apply**](.github/workflows/tf-plan-apply.yml)
 
@@ -28,7 +28,7 @@ This is a sample repository that shows how to use GitHub Actions workflows to ma
 
 3. [**Terraform Drift Detection**](.github/workflows/tf-drift.yml)
 
-    This workflow runs on a periodic basis to scan your environment for any configuration drift (i.e. changes made outside of Terraform). If any drift is detected a GitHub Issue is raised to alert the maintainers of the project. 
+    This workflow runs on a periodic basis to scan your environment for any configuration drift or changes made outside of terraform. If any drift is detected, a GitHub Issue is raised to alert the maintainers of the project.
 
 ## Getting Started
 
