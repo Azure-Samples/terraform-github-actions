@@ -80,6 +80,8 @@ jobs:
         echo "</details>" >> tf.string
         
         SUMMARY=$(cat tf.string)
+        SUMMARY="${SUMMARY//'%'/'%25'}"
+		    SUMMARY="${SUMMARY//$'\r'/'%0D'}"
         
         echo "summary=$SUMMARY" >> $GITHUB_OUTPUT
 
