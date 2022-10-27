@@ -35,17 +35,12 @@ jobs:
       uses: bridgecrewio/checkov-action@master
       with: 
         framework: terraform
-
-    - name: list
-      run: ls -lh
-      
-    - name: cat
-      run: |
-        cat results.sarif
-        cat checkov*
-      
+        output_format: sarif 
+        output_file_path: checkov.sarif
+    
+    # Upload results to GitHub Advanced Security
     - name: Upload SARIF file
       uses: github/codeql-action/upload-sarif@v2
       with:
-        sarif_file: results.sarif
+        sarif_file: checkov.sarif
         category: checkov
