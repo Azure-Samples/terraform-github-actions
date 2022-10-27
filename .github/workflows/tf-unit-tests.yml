@@ -36,3 +36,9 @@ jobs:
 
     - name: list
       run: ls -lh
+      
+    - name: cat
+      run: |
+        cat results.sarif
+        cat checkov*
+      
