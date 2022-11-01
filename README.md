@@ -10,17 +10,16 @@ This is a sample repository that shows how to use GitHub Actions workflows to ma
 
 1. Create a new branch and check in the needed Terraform code modifications.
 2. Create a Pull Request (PR) in GitHub once you're ready to merge your changes into your environment.
-3. A GitHub Actions workflow will trigger to ensure your code is well formatted. In addition, a Terraform plan will run to generate a preview of the changes that will happen in your Azure environment.
+3. A GitHub Actions workflow will trigger to ensure your code is well formatted, internally consistent, and produces secure infrastructure. In addition, a Terraform plan will run to generate a preview of the changes that will happen in your Azure environment.
 4. Once appropriately reviewed, the PR can be merged into your main branch.
 5. Another GitHub Actions workflow will trigger from the main branch and execute the changes using Terraform.
 6. A regularly scheduled GitHub Action workflow should also run to look for any configuration drift in your environment and create a new issue if changes are detected.
-
 
 ## Workflows
 
 1. [**Terraform Unit Tests**](.github/workflows/tf-unit-tests.yml)
 
-    This workflow runs on every commit and is composed of a set of unit tests on the infrastructure code. It runs [terraform fmt]( https://www.terraform.io/cli/commands/fmt) to ensure the code is properly linted and follows terraform best practices. Next it performs [terraform validate](https://www.terraform.io/cli/commands/validate) to check that the code is syntactically correct and internally consistent.
+    This workflow runs on every commit and is composed of a set of unit tests on the infrastructure code. It runs [terraform fmt]( https://www.terraform.io/cli/commands/fmt) to ensure the code is properly linted and follows terraform best practices. Next it performs [terraform validate](https://www.terraform.io/cli/commands/validate) to check that the code is syntactically correct and internally consistent. Lastly, [checkov](https://github.com/bridgecrewio/checkov), an open source static code analysis tool for IaC, will run to detect security and complaince issues. If the repository is utilizing GitHub Advanced Security (GHAS), the results will be uploaded to GitHub.
 
 2. [**Terraform Plan / Apply**](.github/workflows/tf-plan-apply.yml)
 
@@ -71,7 +70,6 @@ To use these workflows in your environment several prerequisite steps are requir
 
     Instructions to add the secrets to the environment can be found [here](https://docs.github.com/actions/security-guides/encrypted-secrets#creating-encrypted-secrets-for-an-environment). The environment secret will override the repository secret when doing the deploy step to the `production` environment when elevated read/write permissions are required.
     
-
 ## Additional Resources
 
 A companion article detailing how to use GitHub Actions to deploy to Azure using IaC can be found at the [DevOps Resource Center](). `TODO: add link`
