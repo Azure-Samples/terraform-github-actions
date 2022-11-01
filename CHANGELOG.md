@@ -1,13 +1,6 @@
-## [project-title] Changelog
+## GitHub Actions Workflows for Terraform Changelog
 
-<a name="x.y.z"></a>
-# x.y.z (yyyy-mm-dd)
+<a name="1.0.0"></a>
+# 1.0.0 (2022-11-01)
 
-*Features*
-* ...
-
-*Bug Fixes*
-* ...
-
-*Breaking Changes*
-* ...
+Initial Version
