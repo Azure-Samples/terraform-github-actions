@@ -39,7 +39,7 @@ To use these workflows in your environment some prerequisite steps are required.
     $ az account tenant list
 
     # Set the wanted subscription and tenant ID
-    az account set --subscription <AZURE_SUBSCRIPTION> --tenant <TENANT_ID>
+    az account set --subscription <AZURE_SUBSCRIPTION>
 ```
 
 1. **Configure Terraform State Location**
