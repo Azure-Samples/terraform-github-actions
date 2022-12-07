@@ -31,15 +31,31 @@ This is a sample repository that shows how to use GitHub Actions workflows to ma
 
 ## Getting Started
 
-To use these workflows in your environment several prerequisite steps are required:
+To use these workflows in your environment some prerequisite steps are required. Ensure to be in the Azure subscription/tenant where you want to deploy your infrastructure before going through the following steps.
+
+```bash
+    # Retrieve the available Azure subscriptions and tenants ID
+    $ az account list
+    $ az account tenant list
+
+    # Set the wanted subscription and tenant ID
+    az account set --subscription <AZURE_SUBSCRIPTION>
+```
 
 1. **Configure Terraform State Location**
 
     Terraform utilizes a [state file](https://www.terraform.io/language/state) to store information about the current state of your managed infrastructure and associated configuration. This file will need to be persisted between different runs of the workflow. The recommended approach is to store this file within an Azure Storage Account or other similar remote backend. Normally, this storage would be provisioned manually or via a separate workflow. The [Terraform backend block](main.tf#L10-L16) will need updated with your selected storage location (see [here](https://developer.hashicorp.com/terraform/language/settings/backends/azurerm) for documentation).
 
+    The following commands can be used to create the required Azure resources:
+    ```bash
+    $ az group create -n rg-terraform-github-actions-state
+    $ az storage account create -n terraformgithubactions --resource-group rg-terraform-github-actions-state
+    $ az storage container create --name tfstate --account-name terraformgithubactions    
+    ```
+
 2. **Create GitHub Environment**
 
-    The workflows utilizes GitHub Environments and Secrets to store the azure identity information and setup an approval process for deployments. Create an environment named `production` by following these [insturctions](https://docs.github.com/actions/deployment/targeting-different-environments/using-environments-for-deployment#creating-an-environment). On the `production` environment setup a protection rule and add any required approvers you want that need to sign off on production deployments. You can also limit the environment to your main branch. Detailed instructions can be found [here](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment#environment-protection-rules).
+    The workflows utilizes GitHub Environments and Secrets to store the azure identity information and setup an approval process for deployments. Create an environment named `production` by following these [instructions](https://docs.github.com/actions/deployment/targeting-different-environments/using-environments-for-deployment#creating-an-environment). On the `production` environment setup a protection rule and add any required approvers you want that need to sign off on production deployments. You can also limit the environment to your main branch. Detailed instructions can be found [here](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment#environment-protection-rules).
 
 3. **Setup Azure Identity**: 
 
@@ -51,6 +67,75 @@ To use these workflows in your environment several prerequisite steps are requir
     For the `read-only` identity create 2 federated credentials as follows:
     - Set `Entity Type` to `Pull Request`.
     - Set `Entity Type` to `Branch` and use the `main` branch name.
+
+    You can run the following commands to create and configure the read-write Azure identity (named `terraform-azure-rw-identity` below):
+    ```bash
+    # Create the SP
+    $ az ad app create --display-name terraform-azure-rw-identity
+    $ APPLICATION_ID=$(az ad app list --all --query "[?displayName=='terraform-azure-rw-identity'].appId" --output tsv)
+    $ az ad sp create --id $APPLICATION_ID
+
+    # Assign roles to the SP
+    $ az role assignment create --assignee $APPLICATION_ID --role "Contributor"
+    $ az role assignment create --assignee $APPLICATION_ID --role "Reader and Data Access"
+
+    # Create the only OIDC credentials for that SP (for GitHub Actions "production" environment)
+    # Be sure to replace <ORGANIZATION> and <REPOSITORY> with your GitHub organization and repository name
+    $ cat <<EOF > oidc.json
+    {
+      "audiences": [
+        "api://AzureADTokenExchange"
+      ],
+      "description": "",
+      "issuer": "https://token.actions.githubusercontent.com",
+      "name": "production-env-oidc",
+      "subject": "repo:<ORGANIZATION>/<REPOSITORY>:environment:production"
+    }
+    EOF
+    $ az ad app federated-credential create --id $APPLICATION_ID --parameters oidc.json
+    ```
+
+    You can run the following commands to create and configure the read-only Azure identity (named `terraform-azure-ro-identity` below):
+    ```bash
+    # Create the SP
+    $ az ad app create --display-name terraform-azure-ro-identity
+    $ APPLICATION_ID=$(az ad app list --all --query "[?displayName=='terraform-azure-ro-identity'].appId" --output tsv)
+    $ az ad sp create --id $APPLICATION_ID
+
+    # Assign roles to the SP
+    $ az role assignment create --assignee $APPLICATION_ID --role "Reader"
+    $ az role assignment create --assignee $APPLICATION_ID --role "Reader and Data Access"
+
+    # Create the first OIDC credentials for that SP (for GitHub actions on pull requests)
+    # Be sure to replace <ORGANIZATION> and <REPOSITORY> with your GitHub organization and repository name
+    $ cat <<EOF > oidc.json
+    {
+      "audiences": [
+        "api://AzureADTokenExchange"
+      ],
+      "description": "Pull-Request OIDC for GHES Azure Terraform Reader app",
+      "issuer": "https://token.actions.githubusercontent.com",
+      "name": "pr-oidc",
+      "subject": "repo:ghsioux-octodemo/ghes-deploy-terraform-azure:pull_request"
+    }
+    EOF
+    $ az ad app federated-credential create --id $APPLICATION_ID --parameters oidc.json
+
+    # Create the second OIDC credentials for that SP (for GitHub actions on the main branch)
+    # Be sure to replace <ORGANIZATION> and <REPOSITORY> with your GitHub organization and repository name
+    $ cat <<EOF > oidc.json
+    {
+      "audiences": [
+        "api://AzureADTokenExchange"
+      ],
+      "description": "Main branch OIDC for GHES Azure Terraform Reader app",
+      "issuer": "https://token.actions.githubusercontent.com",
+      "name": "main-oidc",
+      "subject": "repo:ghsioux-octodemo/ghes-deploy-terraform-azure:ref:refs/heads/main"
+    }
+    EOF
+    $ az ad app federated-credential create --id $APPLICATION_ID --parameters oidc.json
+    ```
 
 4. **Add GitHub Secrets**
 
@@ -69,6 +154,25 @@ To use these workflows in your environment several prerequisite steps are requir
     - `AZURE_CLIENT_ID` : The application (client) ID of the app registration in Azure
 
     Instructions to add the secrets to the environment can be found [here](https://docs.github.com/actions/security-guides/encrypted-secrets#creating-encrypted-secrets-for-an-environment). The environment secret will override the repository secret when doing the deploy step to the `production` environment when elevated read/write permissions are required.
+
+    The following commands can be used to set up the above GitHub Secrets:
+    ```bash
+    # Switch to the repo's directory
+    $ cd terraform-github-actions
+
+    # Set repository default secrets
+    # Be sure to replace <AZURE_SUBSCRIPTION> with the name of your Azure subscription
+    $ AZURE_CLIENT_ID=$(az ad app list --all --query "[?displayName=='terraform-azure-ro-identity'].appId" --output tsv)
+    $ AZURE_TENANT_ID=$(az account list --all --query "[?name=='<AZURE_SUBSCRIPTION>'].tenantId" --output tsv)
+    $ AZURE_SUBSCRIPTION_ID=$(az account list --all --query "[?name=='<AZURE_SUBSCRIPTION>'].id" --output tsv)
+    $ gh secret set AZURE_CLIENT_ID --body "$AZURE_CLIENT_ID"
+    $ gh secret set AZURE_TENANT_ID --body "$AZURE_TENANT_ID"
+    $ gh secret set AZURE_SUBSCRIPTION_ID --body "$AZURE_SUBSCRIPTION_ID"
+
+    # Set secret for the production environment
+    $ AZURE_CLIENT_ID=$(az ad app list --all --query "[?displayName=='terraform-azure-rw-identity'].appId" --output tsv)
+    $ gh secret set AZURE_CLIENT_ID --body "$AZURE_CLIENT_ID" --env production
+    ```
     
 ## Additional Resources
 
