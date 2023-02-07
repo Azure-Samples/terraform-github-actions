@@ -9,7 +9,7 @@ terraform {
   # Update this block with the location of your terraform state file
   backend "azurerm" {
     resource_group_name  = "rg-terraform-github-actions-state"
-    storage_account_name = "terraformgithubactions"
+    storage_account_name = "terraformghactionsvya01"
     container_name       = "tfstate"
     key                  = "terraform.tfstate"
     use_oidc             = true
@@ -25,4 +25,24 @@ provider "azurerm" {
 resource "azurerm_resource_group" "rg-aks" {
   name     = var.resource_group_name
   location = var.location
+}
+
+
+# Sample NSG designed to raise a security alert. Delete for any real deployment.
+resource "azurerm_network_security_group" "nsg-fail" {
+  name                = "insecureNSG"
+  location            = azurerm_resource_group.rg-aks.location
+  resource_group_name = azurerm_resource_group.rg-aks.name
+
+  security_rule {
+    name                       = "badrule"
+    priority                   = 100
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "*"
+    source_port_range          = "*"
+    destination_port_range     = "*"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
 }
