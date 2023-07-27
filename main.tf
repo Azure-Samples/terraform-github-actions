@@ -1,28 +1,34 @@
 terraform {
-  required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = ">= 3.7.0"
-    }
-  }
-
-  # Update this block with the location of your terraform state file
   backend "azurerm" {
-    resource_group_name  = "rg-terraform-github-actions-state"
-    storage_account_name = "terraformgithubactions"
-    container_name       = "tfstate"
-    key                  = "terraform.tfstate"
-    use_oidc             = true
+    resource_group_name  = "doas-rg"
+    storage_account_name = "remotestatefiledoas23"
+    container_name       = "tf-statefile-demo"
+    key                  = "terraformgithubexample.tfstate"
   }
 }
 
 provider "azurerm" {
+  # The "feature" block is required for AzureRM provider 2.x.
+  # If you're using version 1.x, the "features" block is not allowed.
+  version = "~>2.0"
   features {}
-  use_oidc = true
 }
 
-# Define any Azure resources to be created here. A simple resource group is shown here as a minimal example.
-resource "azurerm_resource_group" "rg-aks" {
-  name     = var.resource_group_name
-  location = var.location
+data "azurerm_client_config" "current" {}
+
+
+
+#Create Virtual Network
+resource "azurerm_virtual_network" "vnet" {
+  name                = "tamops-vnet"
+  address_space       = ["192.168.0.0/16"]
+  location            = "southeastasia"
+  resource_group_name = "doas-rg"
+}
+# Create Subnet
+resource "azurerm_subnet" "subnet" {
+  name                 = "subnet"
+  resource_group_name  = "doas-rg"
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefix       = "192.168.0.0/24"
 }
