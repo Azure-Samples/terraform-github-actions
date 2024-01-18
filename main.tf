@@ -11,7 +11,7 @@ terraform {
     resource_group_name  = "terraform-github-actions"
     storage_account_name = "terraformgithubpoc"
     container_name       = "tfstatefile"
-    key                  = "CvBjuNaplDWKbILg/Kasqoqg0/Uqwkib+12KyWr4pmT9OBtbDzsM5cwd9nM8pzWQTx4VZtjnen3y+AStDElqeQ=="
+    key                  = "state"
     use_oidc             = true
   }
 }
