@@ -72,4 +72,4 @@ To use these workflows in your environment several prerequisite steps are requir
     
 ## Additional Resources
 
-A companion article detailing how to use GitHub Actions to deploy to Azure using IaC can be found at the [DevOps Resource Center](). `TODO: add link`
+A companion article detailing how to use GitHub Actions to deploy to Azure using IaC can be found at the [DevOps Resource Center](https://learn.microsoft.com/devops/deliver/iac-github-actions). 
