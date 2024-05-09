@@ -1,28 +1,37 @@
 terraform {
-  required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = ">= 3.7.0"
-    }
-  }
-
-  # Update this block with the location of your terraform state file
+  required_version = ">= 1.5.7"
   backend "azurerm" {
-    resource_group_name  = "rg-terraform-github-actions-state"
-    storage_account_name = "terraformgithubactions"
+    resource_group_name  = "rg1plopez-lab01"
+    storage_account_name = "sta1plopez"
     container_name       = "tfstate"
     key                  = "terraform.tfstate"
-    use_oidc             = true
   }
 }
-
+ 
 provider "azurerm" {
   features {}
-  use_oidc = true
+}
+ 
+data "azurerm_client_config" "current" {}
+ 
+
+module "vnet_module" {
+  source              = "./modules/vnet_module"
+  owner_tag = "plopez"
+  vnet_address_space  = var.vnet_address_space
+  environment_tag = "pRE"
+  vnet_name = var.vnet_name
+  resource_group_name = var.resource_group_name
+  vnet_tags = var.vnet_tags
+
 }
 
-# Define any Azure resources to be created here. A simple resource group is shown here as a minimal example.
-resource "azurerm_resource_group" "rg-aks" {
-  name     = var.resource_group_name
-  location = var.location
+module "subredes" {
+  source = "./modules/subredes"
+  for_each = toset(["1", "2"])
+  resource_group_name  = "rg1plopez-lab01"
+  subnet_address_prefix = ["10.0.${each.key}.0/24"]
+  vnet_name = module.vnet_module.name
+  subnet_name = each.value
 }
+
