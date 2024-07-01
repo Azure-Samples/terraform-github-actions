@@ -8,10 +8,10 @@ terraform {
 
   # Update this block with the location of your terraform state file
   backend "azurerm" {
-    resource_group_name  = "rg-terraform-github-actions-state"
-    storage_account_name = "terraformgithubactions"
-    container_name       = "tfstate"
-    key                  = "terraform.tfstate"
+    resource_group_name  = "terraformrg"
+    storage_account_name = "terraformstoragefe832e63"
+    container_name       = "terraform"
+    key                  = "tf-github-actions.tfstate"
     use_oidc             = true
   }
 }
