@@ -40,6 +40,9 @@ jobs:
       uses: bridgecrewio/checkov-action@master
       with: 
         framework: terraform
+        # This will add both a CLI output to the console and create a results.sarif file
+        output_format: cli,sarif
+        output_file_path: console,results.sarif
 
     # Upload results to GitHub Advanced Security
     - name: Upload SARIF file
