@@ -27,7 +27,7 @@ resource "azurerm_resource_group" "rg-aks" {
   location = var.location
 }
 # Define any Azure resources to be created here. A simple resource group is shown here as a minimal example.
-resource "azurerm_resource_group" "rg-aks2" {
+resource "azurerm_resource_group" "rg-ak2s2" {
   name     = "rg-dave-testgruop"
   location = var.location
 }
