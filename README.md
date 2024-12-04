@@ -69,7 +69,24 @@ To use these workflows in your environment several prerequisite steps are requir
     - `AZURE_CLIENT_ID` : The application (client) ID of the app registration in Azure
 
     Instructions to add the secrets to the environment can be found [here](https://docs.github.com/actions/security-guides/encrypted-secrets#creating-encrypted-secrets-for-an-environment). The environment secret will override the repository secret when doing the deploy step to the `production` environment when elevated read/write permissions are required.
-    
+
+## Security Concerns
+
+> [!WARNING]  
+> Terraform plans may contain unecrypted secret information! 
+
+The **Terraform Plan / Apply** GitHub Action workflow uploads the Terraform plan as an artifact. This is to ensure that the changes being approved are exactly those that will be applied in the **apply** stage. However, it is important to note that the plan file may contain unencrypted secrets (see https://github.com/hashicorp/terraform/issues/29535). For additional security hardening you should consider either:
+
+1. Encyrpting / Decrypting the tfplam
+   
+    Before uploading the tfplan file to GitHub you can leverage a repo secret to encrypt the file. Then after downloading the file could then be decrypted with the same secret. This would prevent anyone from downloading the plan file to access secret information directly. Only those who have the ability to access the secret can decrypt the file.   
+   
+    See example: https://github.com/MatthewWilkes/test-gh-actions-gpg/blob/main/.github/workflows/tf-plan-apply.yml (Thanks @MatthewWilkes)
+
+2. Leverage ephermeral values
+
+   Terraform 1.10 added support for defining ephermeral values to protect secret information from being stored in plan or state files. See https://www.hashicorp.com/blog/terraform-1-10-improves-handling-secrets-in-state-with-ephemeral-values
+
 ## Additional Resources
 
 A companion article detailing how to use GitHub Actions to deploy to Azure using IaC can be found at the [DevOps Resource Center](https://learn.microsoft.com/devops/deliver/iac-github-actions). 
