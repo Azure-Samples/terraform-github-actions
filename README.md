@@ -73,19 +73,19 @@ To use these workflows in your environment several prerequisite steps are requir
 ## Security Concerns
 
 > [!WARNING]  
-> Terraform plans may contain unecrypted secret information! 
+> Terraform plans may contain unencrypted secret information! 
 
 The **Terraform Plan / Apply** GitHub Action workflow uploads the Terraform plan as an artifact. This is to ensure that the changes being approved are exactly those that will be applied in the **apply** stage. However, it is important to note that the plan file may contain unencrypted secrets (see https://github.com/hashicorp/terraform/issues/29535). For additional security hardening you should consider either:
 
-1. Encyrpting / Decrypting the tfplam
+1. Encrypting / Decrypting the tfplan
    
     Before uploading the tfplan file to GitHub you can leverage a repo secret to encrypt the file. Then after downloading the file could then be decrypted with the same secret. This would prevent anyone from downloading the plan file to access secret information directly. Only those who have the ability to access the secret can decrypt the file.   
    
     See example: https://github.com/MatthewWilkes/test-gh-actions-gpg/blob/main/.github/workflows/tf-plan-apply.yml (Thanks @MatthewWilkes)
 
-2. Leverage ephermeral values
+2. Leverage ephemeral values
 
-   Terraform 1.10 added support for defining ephermeral values to protect secret information from being stored in plan or state files. See https://www.hashicorp.com/blog/terraform-1-10-improves-handling-secrets-in-state-with-ephemeral-values
+   Terraform 1.10 added support for defining ephemeral values to protect secret information from being stored in plan or state files. See https://www.hashicorp.com/blog/terraform-1-10-improves-handling-secrets-in-state-with-ephemeral-values
 
 ## Additional Resources
 
