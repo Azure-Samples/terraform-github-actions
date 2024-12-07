@@ -26,3 +26,8 @@ resource "azurerm_resource_group" "rg-aks" {
   name     = var.resource_group_name
   location = var.location
 }
+
+resource "azurerm_resource_group" "rg-aks1" {
+  name     = "rg-test"
+  location = var.location
+}
