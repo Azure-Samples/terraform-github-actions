@@ -4,7 +4,7 @@ This is a sample repository that shows how to use GitHub Actions workflows to ma
 
 ## Architecture
 
-<img width="2159" alt="GitHub Actions CICD for Terraform" src="https://user-images.githubusercontent.com/1248896/189254453-439dd558-fc6c-4377-b01c-d5e54cc49403.png">
+<img width="2159" alt="GitHub Actions CICD for Terraform" src="https://github.com/user-attachments/assets/1296249c-4f8f-4adf-8cfd-6b643f31d935">
 
 ## Dataflow
 
